@@ -6,7 +6,7 @@ Built on a Microsoft 365 E5 tenant using Microsoft Forms, Power Automate, Micros
 
 ---
 
-## The Problem
+# The Problem
 
 In a typical enterprise, onboarding a single new hire takes ~45 minutes of coordinated work across four teams:
 
@@ -18,7 +18,7 @@ In a typical enterprise, onboarding a single new hire takes ~45 minutes of coord
 
 The process is error-prone (typos in usernames, forgotten license assignments, inconsistent group membership), expensive in admin time, and creates a poor first-day experience for the new hire who waits hours or days for access. It also doesn't scale — onboarding 50 hires in a quarter compounds the same errors 50 times.
 
-## The Solution
+# The Solution
 
 A single Microsoft Form acts as the system of record. Submitting it triggers a Power Automate cloud flow that creates the user with the correct attributes set. Everything downstream — license assignment, group membership, security policy enforcement, device baseline — reacts automatically through attribute-based rules already configured in Entra and Intune.
 
@@ -26,7 +26,7 @@ The architectural insight: **the automation is small because the infrastructure 
 
 ---
 
-## Architecture
+# Architecture
 
 ```
 ┌─────────────────┐
@@ -71,7 +71,7 @@ The architectural insight: **the automation is small because the infrastructure 
 └─────────────────────────────────────────────────────┘
 ```
 
-## Tech Stack
+# Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -86,9 +86,9 @@ The architectural insight: **the automation is small because the infrastructure 
 
 ---
 
-## Logic
+# Logic
 
-### Form schema
+# Form schema
 
 The "New Hire Request" form captures seven fields:
 
@@ -104,7 +104,7 @@ The "New Hire Request" form captures seven fields:
 
 The Department field is the architectural keystone. Its values (`Sales`, `Engineering`, `HR`, `Finance`, `Marketing`) are constrained Choice options that match — character for character — the dynamic group rules in Entra. This makes typos impossible.
 
-### Power Automate flow
+# Power Automate flow
 
 The flow runs as 7 actions:
 
@@ -124,7 +124,7 @@ The flow runs as 7 actions:
 
 Once Action 5 completes, Entra's dynamic membership engine evaluates the user's `department` attribute against each dynamic group's rule within ~1-5 minutes. Group membership cascades into license assignment (from `grp-AllNewHires`) and CA/Intune policy targeting.
 
-### Dynamic membership rules
+# Dynamic membership rules
 
 Each department group uses a single-expression rule:
 
@@ -142,29 +142,29 @@ This catch-all is what carries the M365 E5 license assignment, ensuring every ac
 
 ---
 
-## Security Posture
+# Security Posture
 
 The project demonstrates four layered enterprise security practices:
 
-### 1. Mandatory MFA via Conditional Access
+# 1. Mandatory MFA via Conditional Access
 
 Policy **CA001 — Require MFA for All New Hires** targets `grp-AllNewHires` and grants access to any cloud app only after multifactor authentication succeeds. Every user created by the flow lands in this group within minutes and inherits the policy. New hires cannot sign in without setting up MFA on first login.
 
-### 2. Break-Glass Account Exclusion
+# 2. Break-Glass Account Exclusion
 
 A dedicated `breakglass` account holds Global Administrator privileges and is **explicitly excluded** from CA001. Its credentials are stored physically (paper, offline) and the account is never used for routine administration. This is the recovery path if the regular admin's MFA device is lost — a non-negotiable safeguard in any production tenant. Without it, a single failed authenticator app can permanently lock an organization out of its own tenant.
 
-### 3. Forced Password Rotation
+# 3. Forced Password Rotation
 
 Auto-generated passwords are flagged `forceChangePasswordNextSignIn`. The user cannot complete their first sign-in without immediately rotating the credential. This means no human, including the IT admin who provisions the account, knows the long-term password.
 
-### 4. Device Baseline via Intune
+# 4. Device Baseline via Intune
 
 A configuration profile targets `grp-AllNewHires` and pushes a baseline policy (in this implementation: forced desktop wallpaper; in production: BitLocker disk encryption, screen lock timing, USB restrictions, etc.) to any Windows device the user enrolls. Device compliance is tied to identity, not provisioned out-of-band.
 
 ---
 
-## Efficiency Gains
+# Efficiency Gains
 
 | Metric | Manual Process | Automated Process |
 |---|---|---|
@@ -175,7 +175,7 @@ A configuration profile targets `grp-AllNewHires` and pushes a baseline policy (
 | Risk of inconsistent group membership | Common | Eliminated (attribute-based rules) |
 | Audit trail | Email chains, ticket threads | Native Entra audit log + Power Automate run history |
 
-### Cost-management note
+# Cost-management note
 
 License assignment is performed at the group level, not the user level. This means:
 
@@ -187,11 +187,11 @@ This is the production pattern used in large enterprises for managing thousands 
 
 ---
 
-## Screenshots
+# Screenshots
 
 > All screenshots taken from the live M365 E5 tenant during end-to-end testing.
 
-### Infrastructure (Day 1)
+# Infrastructure (Day 1)
 
 | # | Screenshot | What it shows |
 |---|---|---|
@@ -200,7 +200,7 @@ This is the production pattern used in large enterprises for managing thousands 
 | 3 | `03-conditional-access-policy.png` | CA001 policy: scoped to `grp-AllNewHires`, breakglass excluded, MFA required |
 | 4 | `04-intune-config-profile.png` | Intune configuration profile assigned to `grp-AllNewHires` |
 
-### Automation (Day 2)
+# Automation (Day 2)
 
 | # | Screenshot | What it shows |
 |---|---|---|
@@ -208,7 +208,7 @@ This is the production pattern used in large enterprises for managing thousands 
 | 6 | `11-flow-all-actions.png` | The complete Power Automate cloud flow, 7 actions |
 | 7 | `12-flow-run-all-green.png` | A successful end-to-end run with every action green-checked |
 
-### Reactions (downstream of user creation)
+# Reactions (downstream of user creation)
 
 | # | Screenshot | What it shows |
 |---|---|---|
@@ -220,7 +220,7 @@ This is the production pattern used in large enterprises for managing thousands 
 
 ---
 
-## Production Considerations
+# Production Considerations
 
 A few honest notes on what would change if this were deployed in a real organization rather than a lab tenant:
 
@@ -232,7 +232,7 @@ A few honest notes on what would change if this were deployed in a real organiza
 
 ---
 
-## Lessons Learned
+# Lessons Learned
 
 A few non-obvious gotchas encountered during the build, documented here for anyone reproducing it:
 
@@ -244,13 +244,13 @@ A few non-obvious gotchas encountered during the build, documented here for anyo
 
 ---
 
-## Tenant Cleanup
+# Tenant Cleanup
 
 This project was built on a 30-day trial. To prevent accidental conversion to a paid subscription, the trial was cancelled before its expiration date.
 
 ---
 
-## Repository Contents
+# Repository Contents
 
 ```
 .
@@ -275,7 +275,7 @@ This project was built on a 30-day trial. To prevent accidental conversion to a 
 
 ---
 
-## Author
+# Author
 
 Hinesh Bandlamudi 
 Built: May 2026  
