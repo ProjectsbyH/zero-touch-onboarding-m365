@@ -187,39 +187,6 @@ This is the production pattern used in large enterprises for managing thousands 
 
 ---
 
-# Screenshots
-
-> All screenshots taken from the live M365 E5 tenant during end-to-end testing.
-
-# Infrastructure (Day 1)
-
-| # | Screenshot | What it shows |
-|---|---|---|
-| 1 | `01-dynamic-groups.png` | Six dynamic groups (5 departmental + 1 catch-all), all Cloud-sourced, Security-typed |
-| 2 | `02-group-based-licensing.png` | M365 E5 license assigned to `grp-AllNewHires` via group-based licensing |
-| 3 | `03-conditional-access-policy.png` | CA001 policy: scoped to `grp-AllNewHires`, breakglass excluded, MFA required |
-| 4 | `04-intune-config-profile.png` | Intune configuration profile assigned to `grp-AllNewHires` |
-
-# Automation (Day 2)
-
-| # | Screenshot | What it shows |
-|---|---|---|
-| 5 | `05-microsoft-form.png` | New Hire Request form with 7 fields, including constrained Department choices |
-| 6 | `11-flow-all-actions.png` | The complete Power Automate cloud flow, 7 actions |
-| 7 | `12-flow-run-all-green.png` | A successful end-to-end run with every action green-checked |
-
-# Reactions (downstream of user creation)
-
-| # | Screenshot | What it shows |
-|---|---|---|
-| 8 | `13-welcome-email-received.png` | The welcome email as received, with attached Getting Started PDF (password redacted) |
-| 9 | `14-user-in-entra.png` | The newly created user in Entra → Users with department/title populated |
-| 10 | `15-dynamic-group-member.png` | The user listed as a member of `grp-dept-<Department>` (dynamic membership fired) |
-| 11 | `16-license-inherited.png` | The user's Licenses tab showing E5 **inherited** from `grp-AllNewHires` |
-| 12 | `18-audit-log-user-creation.png` | Entra audit log entry for the automated user creation event |
-
----
-
 # Production Considerations
 
 A few honest notes on what would change if this were deployed in a real organization rather than a lab tenant:
@@ -241,37 +208,6 @@ A few non-obvious gotchas encountered during the build, documented here for anyo
 - **Microsoft 365 Developer Program no longer offers free sandbox subscriptions** to most applicants since early 2024. This project was built on a 30-day Microsoft 365 E5 trial tenant instead, which provides functionally equivalent capabilities (Entra ID P2, Intune, Conditional Access) within the trial window.
 - **Email deliverability to Gmail from new `.onmicrosoft.com` tenants is unreliable.** The fix in production is a verified custom domain with proper SPF/DKIM/DMARC; in a lab, testing against non-Gmail addresses (Outlook, Yahoo, institutional email) sidesteps the spam-filter issue.
 - **Dynamic group membership is eventually consistent.** Plan for 1-5 minutes between user attribute changes and group membership reflecting downstream. This is fine for onboarding (where the user is being set up over many minutes anyway) but matters in scenarios with tight time constraints.
-
----
-
-# Tenant Cleanup
-
-This project was built on a 30-day trial. To prevent accidental conversion to a paid subscription, the trial was cancelled before its expiration date.
-
----
-
-# Repository Contents
-
-```
-.
-├── README.md                          (this file)
-├── /screenshots
-│   ├── 01-dynamic-groups.png
-│   ├── 02-group-based-licensing.png
-│   ├── 03-conditional-access-policy.png
-│   ├── 04-intune-config-profile.png
-│   ├── 05-microsoft-form.png
-│   ├── 11-flow-all-actions.png
-│   ├── 12-flow-run-all-green.png
-│   ├── 13-welcome-email-received.png
-│   ├── 14-user-in-entra.png
-│   ├── 15-dynamic-group-member.png
-│   ├── 16-license-inherited.png
-│   ├── 17-ca-policy-enforced.png
-│   └── 18-audit-log-user-creation.png
-└── /flow-export
-    └── ZeroTouchOnboarding.json       (optional: Power Automate flow definition export)
-```
 
 ---
 
